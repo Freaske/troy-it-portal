@@ -7,7 +7,19 @@ import { getRequestSession } from "@/lib/auth/request-session";
 import { prisma } from "@/lib/prisma";
 
 const MAX_FILE_SIZE_BYTES = 3 * 1024 * 1024;
-const UPLOAD_DIR = path.resolve(process.cwd(), "public/uploads/lecturers");
+
+function resolveUploadDir(): string {
+  const envPath = process.env.LECTURER_UPLOAD_DIR?.trim();
+  if (envPath) {
+    return envPath;
+  }
+
+  if (fs.existsSync("/data/uploads")) {
+    return "/data/uploads/lecturers";
+  }
+
+  return path.resolve(process.cwd(), "public/uploads/lecturers");
+}
 
 function normalizeLecturerId(raw: string): string {
   return raw
@@ -79,9 +91,10 @@ export async function POST(
       );
     }
 
-    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+    const uploadDir = resolveUploadDir();
+    fs.mkdirSync(uploadDir, { recursive: true });
     const fileName = `${lecturerFileSlug}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const absolutePath = path.join(UPLOAD_DIR, fileName);
+    const absolutePath = path.join(uploadDir, fileName);
     const buffer = Buffer.from(await file.arrayBuffer());
     fs.writeFileSync(absolutePath, buffer);
 

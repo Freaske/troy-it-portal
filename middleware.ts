@@ -17,6 +17,7 @@ function isPublicPath(pathname: string): boolean {
 function isStaticPath(pathname: string): boolean {
   return (
     pathname.startsWith("/_next") ||
+    pathname.startsWith("/uploads/") ||
     pathname.startsWith("/favicon") ||
     pathname.startsWith("/public") ||
     pathname === "/robots.txt" ||
