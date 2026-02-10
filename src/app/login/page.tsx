@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { LoginForm } from "@/app/login/login-form";
@@ -25,9 +24,6 @@ export default async function LoginPage() {
       <section className="login-panel">
         <h2>Sign in</h2>
         <LoginForm />
-        <p className="hint-text">
-          Chưa có tài khoản? <Link href="/register">Đăng ký</Link>
-        </p>
       </section>
     </main>
   );
