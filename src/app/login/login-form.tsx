@@ -151,7 +151,7 @@ export function LoginForm() {
     return (
       <form onSubmit={submitVerification} className="login-form">
         <p className="muted-small">
-          Thiết bị mới cần xác thực. Mã đã được gửi tới email: <strong>{maskedEmail || "your account email"}</strong>.
+          Thiết bị mới. Nhập mã đã gửi tới: <strong>{maskedEmail || "your account email"}</strong>.
         </p>
 
         {devCode ? (
@@ -161,7 +161,7 @@ export function LoginForm() {
         ) : null}
 
         <label>
-          Verification code (6 digits)
+          Verification code
           <input
             value={verificationCode}
             onChange={(event) => setVerificationCode(event.target.value)}
@@ -172,7 +172,7 @@ export function LoginForm() {
         </label>
 
         <button type="submit" className="button-primary" disabled={loading}>
-          {loading ? "Verifying..." : "Verify & sign in"}
+          {loading ? "Verifying..." : "Verify"}
         </button>
 
         <button type="button" className="button-secondary" onClick={() => setStep("credentials")} disabled={loading}>
@@ -191,7 +191,7 @@ export function LoginForm() {
         <input
           value={identity}
           onChange={(event) => setIdentity(event.target.value)}
-          placeholder="admin hoặc abc123@sis.hust.edu.vn"
+          placeholder="abc123@sis.hust.edu.vn"
           required
         />
       </label>
@@ -212,7 +212,7 @@ export function LoginForm() {
       </button>
 
       <p className="hint-text">
-        Chưa có account? <Link href="/register">Đăng ký sinh viên</Link>
+        Chưa có tài khoản? <Link href="/register">Đăng ký</Link>
       </p>
 
       {error ? <p className="status-error">{error}</p> : null}

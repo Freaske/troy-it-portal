@@ -120,7 +120,7 @@ export function RegisterForm() {
       setExpiresAt(requested.payload.expiresAt ?? null);
       setStep("VERIFY");
       setMessage(
-        `${requested.payload.message ?? "Đã gửi mã xác minh đến email."}${
+        `${requested.payload.message ?? "Đã gửi mã xác minh."}${
           requested.payload.devCode ? ` [DEV CODE: ${requested.payload.devCode}]` : ""
         }`,
       );
@@ -225,7 +225,7 @@ export function RegisterForm() {
         {expiryLabel ? <p className="hint-text">Mã hiện tại hết hạn lúc: {expiryLabel}</p> : null}
 
         <button type="submit" className="button-primary" disabled={verifying}>
-          {verifying ? "Đang xác minh..." : "Xác minh và tạo tài khoản"}
+          {verifying ? "Đang xác minh..." : "Xác minh"}
         </button>
 
         <button type="button" className="button-secondary" onClick={() => void onResendCode()} disabled={loading || verifying}>
@@ -313,7 +313,7 @@ export function RegisterForm() {
       </label>
 
       <button type="submit" className="button-primary" disabled={loading}>
-        {loading ? "Đang gửi mã..." : "Đăng ký và nhận mã xác minh"}
+        {loading ? "Đang gửi mã..." : "Gửi mã xác minh"}
       </button>
 
       {message ? <p className="status-ok">{message}</p> : null}
