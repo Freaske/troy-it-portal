@@ -1,0 +1,263 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum DayOfWeek {
+  MON
+  TUE
+  WED
+  THU
+  FRI
+  SAT
+  SUN
+}
+
+enum SessionPeriod {
+  MORNING
+  AFTERNOON
+  EVENING
+  UNKNOWN
+}
+
+enum UiLanguage {
+  VI
+  EN
+  JA
+}
+
+model Semester {
+  id         String      @id @default(cuid())
+  key        String      @unique
+  label      String
+  startDate  DateTime?
+  endDate    DateTime?
+  sourceFile String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  cohorts    Cohort[]
+  entries    ScheduleEntry[]
+  importRuns ImportRun[]
+}
+
+model Cohort {
+  id         String       @id @default(cuid())
+  code       String
+  semesterId String
+  semester   Semester     @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  classGroups ClassGroup[]
+
+  @@unique([semesterId, code])
+}
+
+model ClassGroup {
+  id        String          @id @default(cuid())
+  name      String
+  cohortId  String
+  cohort    Cohort          @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  entries   ScheduleEntry[]
+  createdAt DateTime        @default(now())
+
+  @@unique([cohortId, name])
+}
+
+model Course {
+  id           String          @id @default(cuid())
+  code         String          @unique
+  nameEn       String?
+  nameVi       String?
+  credits      Int?
+  prerequisite String?
+  entries      ScheduleEntry[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model ScheduleEntry {
+  id           String        @id @default(cuid())
+  semesterId   String
+  semester     Semester      @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  classGroupId String
+  classGroup   ClassGroup    @relation(fields: [classGroupId], references: [id], onDelete: Cascade)
+  courseId     String
+  course       Course        @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  dayOfWeek    DayOfWeek
+  session      SessionPeriod @default(UNKNOWN)
+  startTime    String?
+  rawTime      String?
+  room         String?
+  sourceSheet  String
+  sourceRow    Int
+  createdAt    DateTime      @default(now())
+
+  @@index([semesterId, classGroupId, dayOfWeek, startTime])
+  @@unique([semesterId, classGroupId, dayOfWeek, startTime, courseId, sourceRow])
+}
+
+model ImportRun {
+  id         String    @id @default(cuid())
+  semesterId String?
+  semester   Semester? @relation(fields: [semesterId], references: [id], onDelete: SetNull)
+  sourceFile String
+  status     String
+  note       String?
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+}
+
+model LecturerProfile {
+  id         String   @id @default(cuid())
+  lecturerId String   @unique
+  name       String?
+  avatarUrl  String?
+  title      String?
+  department String?
+  email      String?
+  office     String?
+  profileUrl String?
+  bio        String?
+  updatedBy  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model StudentReview {
+  id             String   @id @default(cuid())
+  courseCode     String
+  lecturerId     String?
+  authorUsername String
+  authorName     String?
+  authorRole     String
+  rating         Int
+  content        String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([courseCode, createdAt])
+  @@index([lecturerId, createdAt])
+}
+
+model CourseLecturerOverride {
+  id         String   @id @default(cuid())
+  courseCode String
+  semesterKey String  @default("")
+  lecturerId String
+  enabled    Boolean  @default(true)
+  updatedBy  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([courseCode, semesterKey, lecturerId])
+  @@index([semesterKey, courseCode, enabled])
+}
+
+model CourseTeachingAssignment {
+  id              String   @id @default(cuid())
+  courseCode      String
+  semesterKey     String   @default("")
+  classGroupName  String   @default("")
+  instructionCode String   @default("")
+  lecturerId      String
+  enabled         Boolean  @default(true)
+  updatedBy       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([courseCode, semesterKey, classGroupName, instructionCode, lecturerId])
+  @@index([semesterKey, courseCode, enabled])
+  @@index([semesterKey, classGroupName, instructionCode])
+}
+
+model AccountUser {
+  id             String          @id @default(cuid())
+  username       String          @unique
+  email          String          @unique
+  passwordHash   String
+  name           String
+  role           String          @default("STUDENT")
+  cohortCode     String?
+  classGroupName String?
+  studentCode    String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  devices        DeviceTrust[]
+  challenges     DeviceChallenge[]
+}
+
+model DeviceTrust {
+  id        String      @id @default(cuid())
+  userId    String
+  user      AccountUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceId  String
+  label     String?
+  firstSeen DateTime    @default(now())
+  lastUsed  DateTime    @default(now())
+
+  @@unique([userId, deviceId])
+}
+
+model DeviceChallenge {
+  id        String      @id @default(cuid())
+  userId    String
+  user      AccountUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceId  String
+  codeHash  String
+  expiresAt DateTime
+  consumedAt DateTime?
+  createdAt DateTime    @default(now())
+
+  @@index([userId, expiresAt])
+}
+
+model UserSetting {
+  id             String   @id @default(cuid())
+  username       String   @unique
+  email          String?
+  displayName    String?
+  cohortCode     String?
+  classGroupName String?
+  studentCode    String?
+  preferredLanguage UiLanguage @default(VI)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model RegistrationVerification {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  name           String
+  passwordHash   String
+  cohortCode     String?
+  classGroupName String?
+  studentCode    String?
+  codeHash       String
+  expiresAt      DateTime
+  consumedAt     DateTime?
+  resendCount    Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([expiresAt])
+}
+
+model StudentGradeEntry {
+  id           String   @id @default(cuid())
+  username     String
+  semesterKey  String
+  courseCode   String
+  courseName   String?
+  credits      Int
+  gradeLetter  String
+  gradePoint   Float?
+  includeInGpa Boolean  @default(true)
+  note         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([username, semesterKey, courseCode])
+  @@index([username, semesterKey, updatedAt])
+}
