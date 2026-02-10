@@ -63,12 +63,6 @@ These values can be added to `.env.local` if you want to override default local 
 
 The portal requires login for all pages and APIs (except `/api/auth/*`, `/login`, and `/register`).
 
-Default demo accounts:
-
-- `admin / hust2026`
-- `student / troy2026`
-- `lecturer / bkhanoi2026`
-
 Student registration:
 
 - API: `POST /api/auth/register`
@@ -85,7 +79,7 @@ Customize users with:
 
 ```bash
 AUTH_SECRET="your-long-secret"
-PORTAL_USERS="admin:pass:ADMIN:Admin Name;student:pass:STUDENT:Student Name"
+PORTAL_USERS="<username>:<password>:<ROLE>:<Display Name>;..."
 ```
 
 `PORTAL_USERS` format: `username:password:ROLE:Display Name` separated by `;`.
